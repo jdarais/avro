@@ -82,6 +82,13 @@ impl<'a, W: Write> Writer<'a, W> {
         self.schema
     }
 
+    pub fn add_schema(&mut self, schema: &'a Schema) -> AvroResult<()> {
+        match self.resolved_schema.as_mut() {
+            Some(resolved_schema) => resolved_schema.add_schema(schema),
+            None => Ok(())
+        }
+    }
+
     /// Append a compatible value (implementing the `ToAvro` trait) to a `Writer`, also performing
     /// schema validation.
     ///

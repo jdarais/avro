@@ -361,6 +361,24 @@ impl<'s> ResolvedSchema<'s> {
     pub(crate) fn get_names(&self) -> &NamesRef<'s> {
         &self.names_ref
     }
+    pub(crate) fn add_schema(&mut self, schema: &'s Schema) -> AvroResult<()> {
+        let name = match schema {
+            Schema::Record{ name, .. } => name,
+            Schema::Enum{ name, .. } => name,
+            Schema::Fixed{ name, .. } => name,
+            _ => {
+                return Err(Error::GetNameField);
+            }
+        };
+
+        if self.names_ref.get(name).is_some() {
+            return Err(Error::NameCollision(name.to_string()));
+        }
+
+        let existing = self.names_ref.insert(name.clone(), schema);
+
+        Ok(())
+    }
 
     fn from_internal(
         schema: &'s Schema,
