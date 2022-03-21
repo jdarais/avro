@@ -375,7 +375,7 @@ impl<'s> ResolvedSchema<'s> {
             return Err(Error::NameCollision(name.to_string()));
         }
 
-        let existing = self.names_ref.insert(name.clone(), schema);
+        self.names_ref.insert(name.clone(), schema);
 
         Ok(())
     }

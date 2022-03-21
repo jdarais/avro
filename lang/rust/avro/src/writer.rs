@@ -85,7 +85,12 @@ impl<'a, W: Write> Writer<'a, W> {
     pub fn add_schema(&mut self, schema: &'a Schema) -> AvroResult<()> {
         match self.resolved_schema.as_mut() {
             Some(resolved_schema) => resolved_schema.add_schema(schema),
-            None => Ok(())
+            None => {
+                let mut resolved_schema = ResolvedSchema::try_from(self.schema)?;
+                resolved_schema.add_schema(schema)?;
+                self.resolved_schema = Some(resolved_schema);
+                Ok(())
+            }
         }
     }
 
