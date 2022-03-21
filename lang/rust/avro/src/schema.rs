@@ -361,21 +361,31 @@ impl<'s> ResolvedSchema<'s> {
     pub(crate) fn get_names(&self) -> &NamesRef<'s> {
         &self.names_ref
     }
-    pub(crate) fn add_schema(&mut self, schema: &'s Schema) -> AvroResult<()> {
-        let name = match schema {
-            Schema::Record{ name, .. } => name,
-            Schema::Enum{ name, .. } => name,
-            Schema::Fixed{ name, .. } => name,
-            _ => {
-                return Err(Error::GetNameField);
-            }
-        };
 
-        if self.names_ref.get(name).is_some() {
-            return Err(Error::NameCollision(name.to_string()));
+    pub fn new(root_schema: &'s Schema, ref_schemas: &[&'s Schema]) -> AvroResult<ResolvedSchema<'s>> {
+        let mut names_ref: NamesRef<'s> = HashMap::new();
+        for ref_schema in ref_schemas {
+            let name = match ref_schema {
+                Schema::Record{ name, .. } => name,
+                Schema::Enum{ name, .. } => name,
+                Schema::Fixed{ name, .. } => name,
+                _ => {
+                    return Err(Error::GetNameField);
+                }
+            };
+    
+            if names_ref.get(name).is_some() {
+                return Err(Error::NameCollision(name.to_string()));
+            }
+    
+            names_ref.insert(name.clone(), ref_schema);
         }
 
-        self.names_ref.insert(name.clone(), schema);
+        Ok(Self::from_internal(root_schema, names_ref, &None))
+    }
+
+    pub(crate) fn add_schema(&mut self, schema: &'s Schema) -> AvroResult<()> {
+
 
         Ok(())
     }

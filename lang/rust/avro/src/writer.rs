@@ -60,6 +60,7 @@ impl<'a, W: Write> Writer<'a, W> {
     /// to.
     /// No compression `Codec` will be used.
     pub fn new(schema: &'a Schema, writer: W) -> Self {
+        println!("Creating a new writer");
         let mut w = Self::builder().schema(schema).writer(writer).build();
         w.resolved_schema = ResolvedSchema::try_from(schema).ok();
         w
